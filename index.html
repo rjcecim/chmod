@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="UTF-8">
+<title>Jogo de Aprendizado - CHMOD</title>
+<style>
+  body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f4f4f4;
+    margin: 0;
+    padding: 20px;
+    color: #333;
+  }
+  h1 {
+    color: #333;
+    text-align: center;
+  }
+  .container {
+    max-width: 800px;
+    width: 100%;
+    margin: auto;
+    background: white;
+    padding: 20px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    border-radius: 8px;
+  }
+  button {
+    background-color: #5C6BC0;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    margin: 10px 0;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+    display: block;
+    width: 100%;
+  }
+  button:hover {
+    background-color: #3949AB;
+  }
+  label {
+    margin-right: 20px;
+  }
+  .permission {
+    margin-bottom: 20px;
+  }
+  .result {
+    font-size: 18px;
+    font-weight: bold;
+    margin-top: 20px;
+  }
+  .correct {
+    color: green;
+  }
+  .incorrect {
+    color: red;
+  }
+  .generated-permission {
+    font-size: 24px;
+    font-weight: bold;
+    background-color: #E8EAF6;
+    padding: 10px;
+    border-radius: 5px;
+    display: inline-block;
+    color: #1A237E;
+  }
+  @media (max-width: 600px) {
+    body {
+      padding: 10px;
+    }
+    button {
+      padding: 8px 10px;
+      font-size: 14px;
+    }
+    .generated-permission {
+      font-size: 18px;
+      padding: 8px;
+    }
+    .result {
+      font-size: 16px;
+    }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>Jogo de Aprendizado - CHMOD</h1>
+
+  <button onclick="generateRandomNumeric()">Gerar Permissão Numérica</button>
+  <p><span class="generated-permission">Permissão Numérica Gerada: <span id="randomNumeric">000</span></span></p>
+  <div id="permissions">
+    <div class="permission">
+      <strong>Dono:</strong>
+      <label><input type="checkbox" id="owner_read"> Leitura (r)</label>
+      <label><input type="checkbox" id="owner_write"> Escrita (w)</label>
+      <label><input type="checkbox" id="owner_execute"> Execução (x)</label>
+    </div>
+    <div class="permission">
+      <strong>Grupo:</strong>
+      <label><input type="checkbox" id="group_read"> Leitura (r)</label>
+      <label><input type="checkbox" id="group_write"> Escrita (w)</label>
+      <label><input type="checkbox" id="group_execute"> Execução (x)</label>
+    </div>
+    <div class="permission">
+      <strong>Outros:</strong>
+      <label><input type="checkbox" id="others_read"> Leitura (r)</label>
+      <label><input type="checkbox" id="others_write"> Escrita (w)</label>
+      <label><input type="checkbox" id="others_execute"> Execução (x)</label>
+    </div>
+  </div>
+  <button onclick="checkNumericAnswer()">Responder</button>
+  <p class="result" id="numericResult"></p>
+</div>
+
+<script>
+function randomPermission() {
+  return Math.floor(Math.random() * 8);
+}
+
+function generateRandomNumeric() {
+  clearResult();
+  clearCheckboxes();
+  document.getElementById("randomNumeric").textContent =
+    randomPermission().toString() +
+    randomPermission().toString() +
+    randomPermission().toString();
+}
+
+function checkNumericAnswer() {
+  let generated = document.getElementById("randomNumeric").textContent;
+  let owner = (document.getElementById("owner_read").checked * 4 +
+               document.getElementById("owner_write").checked * 2 +
+               document.getElementById("owner_execute").checked).toString();
+  let group = (document.getElementById("group_read").checked * 4 +
+               document.getElementById("group_write").checked * 2 +
+               document.getElementById("group_execute").checked).toString();
+  let others = (document.getElementById("others_read").checked * 4 +
+                document.getElementById("others_write").checked * 2 +
+                document.getElementById("others_execute").checked).toString();
+
+  let answer = owner + group + others;
+
+  let resultElement = document.getElementById("numericResult");
+  if (answer === generated) {
+    resultElement.textContent = "Correto!";
+    resultElement.className = "result correct";
+  } else {
+    resultElement.textContent = "Incorreto!";
+    resultElement.className = "result incorrect";
+  }
+}
+
+function clearResult() {
+  document.getElementById("numericResult").textContent = "";
+}
+
+function clearCheckboxes() {
+  document.getElementById("owner_read").checked = false;
+  document.getElementById("owner_write").checked = false;
+  document.getElementById("owner_execute").checked = false;
+  document.getElementById("group_read").checked = false;
+  document.getElementById("group_write").checked = false;
+  document.getElementById("group_execute").checked = false;
+  document.getElementById("others_read").checked = false;
+  document.getElementById("others_write").checked = false;
+  document.getElementById("others_execute").checked = false;
+}
+</script>
+</body>
+</html>
