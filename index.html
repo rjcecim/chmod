@@ -81,7 +81,7 @@
         Permissão Gerada: <span id="randomPermission">---</span>
       </div>
       <div class="d-flex justify-content-center">
-        <button class="btn btn-secondary generate-btn" onclick="generatePermission()">Gerar Novo Número</button>
+        <button class="btn btn-secondary generate-btn" id="generateBtn">Gerar Nova Permissão</button>
       </div>
     </section>
 
@@ -101,49 +101,16 @@
         </div>
         <div class="row">
           <!-- Dono -->
-          <div class="col-4 mb-3 permission-column">
-            <div class="form-check form-switch">
-              <input class="form-check-input" type="checkbox" id="owner_read">
-              <label class="form-check-label" for="owner_read">Leitura (r)</label>
-            </div>
-            <div class="form-check form-switch">
-              <input class="form-check-input" type="checkbox" id="owner_write">
-              <label class="form-check-label" for="owner_write">Escrita (w)</label>
-            </div>
-            <div class="form-check form-switch">
-              <input class="form-check-input" type="checkbox" id="owner_execute">
-              <label class="form-check-label" for="owner_execute">Execução (x)</label>
-            </div>
+          <div class="col-4 mb-3 permission-column" id="ownerPermissions">
+            <!-- Permissões do Dono serão inseridas aqui -->
           </div>
           <!-- Grupo -->
-          <div class="col-4 mb-3 permission-column">
-            <div class="form-check form-switch">
-              <input class="form-check-input" type="checkbox" id="group_read">
-              <label class="form-check-label" for="group_read">Leitura (r)</label>
-            </div>
-            <div class="form-check form-switch">
-              <input class="form-check-input" type="checkbox" id="group_write">
-              <label class="form-check-label" for="group_write">Escrita (w)</label>
-            </div>
-            <div class="form-check form-switch">
-              <input class="form-check-input" type="checkbox" id="group_execute">
-              <label class="form-check-label" for="group_execute">Execução (x)</label>
-            </div>
+          <div class="col-4 mb-3 permission-column" id="groupPermissions">
+            <!-- Permissões do Grupo serão inseridas aqui -->
           </div>
           <!-- Outros -->
-          <div class="col-4 mb-3 permission-column">
-            <div class="form-check form-switch">
-              <input class="form-check-input" type="checkbox" id="others_read">
-              <label class="form-check-label" for="others_read">Leitura (r)</label>
-            </div>
-            <div class="form-check form-switch">
-              <input class="form-check-input" type="checkbox" id="others_write">
-              <label class="form-check-label" for="others_write">Escrita (w)</label>
-            </div>
-            <div class="form-check form-switch">
-              <input class="form-check-input" type="checkbox" id="others_execute">
-              <label class="form-check-label" for="others_execute">Execução (x)</label>
-            </div>
+          <div class="col-4 mb-3 permission-column" id="othersPermissions">
+            <!-- Permissões dos Outros serão inseridas aqui -->
           </div>
         </div>
       </form>
@@ -151,7 +118,7 @@
 
     <!-- Seção do Botão de Resposta e Resultado -->
     <section>
-      <button class="btn btn-success w-100 submit-btn" onclick="checkAnswer()">Responder</button>
+      <button class="btn btn-success w-100 submit-btn" id="submitBtn">Responder</button>
       <div id="resultMessage" class="result"></div>
     </section>
   </main>
@@ -164,77 +131,92 @@
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
   <script>
-    let generatedPermission = '';
+    // Utilizando IIFE para evitar poluição do escopo global
+    (() => {
+      let generatedPermission = '';
 
-    // Função para gerar dígitos de permissão aleatórios (0-7)
-    function randomPermissionDigit() {
-      return Math.floor(Math.random() * 8);
-    }
+      // Função para gerar dígitos de permissão aleatórios (0-7)
+      const randomPermissionDigit = () => Math.floor(Math.random() * 8);
 
-    // Função para gerar permissão numérica
-    function generateNumericPermission() {
-      let numeric = '';
-      for (let i = 0; i < 3; i++) {
-        numeric += randomPermissionDigit();
-      }
-      return numeric;
-    }
+      // Função para gerar permissão numérica
+      const generateNumericPermission = () => Array.from({ length: 3 }, randomPermissionDigit).join('');
 
-    // Função para gerar e exibir a permissão
-    function generatePermission() {
-      generatedPermission = generateNumericPermission();
-      document.getElementById('randomPermission').textContent = generatedPermission;
-      clearResult();
-      clearCheckboxes();
-    }
+      // Função para gerar e exibir a permissão
+      const generatePermission = () => {
+        generatedPermission = generateNumericPermission();
+        document.getElementById('randomPermission').textContent = generatedPermission;
+        clearResult();
+        clearCheckboxes();
+      };
 
-    // Função para verificar a resposta do usuário
-    function checkAnswer() {
-      let userPermission = '';
+      // Função para criar as permissões dinamicamente
+      const createPermissionCheckboxes = () => {
+        const permissions = ['read', 'write', 'execute'];
+        const sections = {
+          owner: document.getElementById('ownerPermissions'),
+          group: document.getElementById('groupPermissions'),
+          others: document.getElementById('othersPermissions')
+        };
 
-      const owner = (document.getElementById("owner_read").checked ? 4 : 0) +
-                    (document.getElementById("owner_write").checked ? 2 : 0) +
-                    (document.getElementById("owner_execute").checked ? 1 : 0);
+        Object.keys(sections).forEach(prefix => {
+          sections[prefix].innerHTML = permissions.map(type => {
+            const capitalizedType = type.charAt(0).toUpperCase() + type.slice(1);
+            return `
+              <div class="form-check form-switch">
+                <input class="form-check-input" type="checkbox" id="${prefix}_${type}">
+                <label class="form-check-label" for="${prefix}_${type}">${capitalizedType} (${type.charAt(0)})</label>
+              </div>
+            `;
+          }).join('');
+        });
+      };
 
-      const group = (document.getElementById("group_read").checked ? 4 : 0) +
-                    (document.getElementById("group_write").checked ? 2 : 0) +
-                    (document.getElementById("group_execute").checked ? 1 : 0);
+      // Função para verificar a resposta do usuário
+      const checkAnswer = () => {
+        const getPermissionValue = (prefix) => {
+          const read = document.getElementById(`${prefix}_read`).checked ? 4 : 0;
+          const write = document.getElementById(`${prefix}_write`).checked ? 2 : 0;
+          const execute = document.getElementById(`${prefix}_execute`).checked ? 1 : 0;
+          return read + write + execute;
+        };
 
-      const others = (document.getElementById("others_read").checked ? 4 : 0) +
-                     (document.getElementById("others_write").checked ? 2 : 0) +
-                     (document.getElementById("others_execute").checked ? 1 : 0);
+        const [owner, group, others] = ['owner', 'group', 'others'].map(getPermissionValue);
+        const userPermission = `${owner}${group}${others}`;
 
-      userPermission = `${owner}${group}${others}`;
+        const resultElement = document.getElementById("resultMessage");
+        if (userPermission === generatedPermission) {
+          resultElement.textContent = "Correto!";
+          resultElement.className = "result correct";
+        } else {
+          resultElement.textContent = `Incorreto! A permissão correta é ${generatedPermission}`;
+          resultElement.className = "result incorrect";
+        }
+        resultElement.style.display = 'block';
+      };
 
-      const resultElement = document.getElementById("resultMessage");
-      if (userPermission === generatedPermission) {
-        resultElement.textContent = "Correto!";
-        resultElement.className = "result correct";
-      } else {
-        resultElement.textContent = `Incorreto! A permissão correta é ${generatedPermission}`;
-        resultElement.className = "result incorrect";
-      }
-      resultElement.style.display = 'block';
-    }
+      // Função para limpar o resultado
+      const clearResult = () => {
+        const resultElement = document.getElementById("resultMessage");
+        resultElement.textContent = "";
+        resultElement.className = "result";
+        resultElement.style.display = 'none';
+      };
 
-    // Função para limpar o resultado
-    function clearResult() {
-      const resultElement = document.getElementById("resultMessage");
-      resultElement.textContent = "";
-      resultElement.className = "result";
-      resultElement.style.display = 'none';
-    }
+      // Função para limpar os checkboxes
+      const clearCheckboxes = () => {
+        document.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
+          checkbox.checked = false;
+        });
+      };
 
-    // Função para limpar os checkboxes
-    function clearCheckboxes() {
-      const checkboxes = document.querySelectorAll('input[type="checkbox"]');
-      checkboxes.forEach(checkbox => {
-        checkbox.checked = false;
+      // Inicialização ao carregar a página
+      document.addEventListener('DOMContentLoaded', () => {
+        createPermissionCheckboxes();
+        document.getElementById('generateBtn').addEventListener('click', generatePermission);
+        document.getElementById('submitBtn').addEventListener('click', checkAnswer);
+        generatePermission(); // Inicialização ao carregar a página
       });
-    }
-
-    // Inicialização ao carregar a página
-    window.onload = generatePermission;
+    })();
   </script>
 </body>
 </html>
